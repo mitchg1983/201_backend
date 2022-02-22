@@ -47,18 +47,15 @@ const deleteMovie = async (req, res) => {
       console.log("Beginning deleteMovie...");
       console.log(req.body);
       console.log(req.body.id);
-      const { id } = req.body.id;
+      const { id } = req.body;
 
-      let deleteMovieById = await Movies.findByIdAndDelete(id);
-      if (deleteMovieById === null) {
+      let deleteMovieById = await Movies.deleteOne({_id: id});
+      if (deleteMovieById.deletedCount == 0) {
         throw new Error(
           "There was an error!!!"
         );
       }
-      res.status(200).json({
-        message: "Movie delted",
-        payload: deleteMovieById
-      });
+      res.send("Success, movie was deleted");
   } catch (error) {
     res.status(500).json({
       message: "error...",
@@ -67,8 +64,37 @@ const deleteMovie = async (req, res) => {
   }
 };
 
+const updateMovie = async (req, res) => {
+  try {
+    const { id } = req.body;
+    let updateThisMovie = await Movies.findByIdAndUpdate(id, req.body, { new: true });
+    if (updateThisMovie === null)
+      throw new Error("No Movie with this id was found, can't update.");
+    res
+      .status(200)
+      .json({ message: "We are updating a movie...", movie: updateThisMovie });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error", error: error });
+  }
+
+}
+
+const getOneMovie = async (req, res) => {
+  try {
+    console.log("Starting getOneMovie", req.body)
+    const { id } = req.body.movie;
+    let getThisMovie = await Movies.findById(id);
+    res.json(getThisMovie);
+  } catch (error) {
+    
+  }
+}
+
 module.exports = {
   createMovie,
   getAllMovies,
   deleteMovie,
+  updateMovie,
+  getOneMovie,
 };
